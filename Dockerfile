@@ -12,18 +12,18 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-# Instalar dependencias de Python
+# Instalar dependencias Python
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Descargar recursos de NLTK necesarios
+# Descargar recursos de NLTK
 RUN python3 -m nltk.downloader punkt stopwords
 
-# Copiar todo el proyecto
+# Copiar el proyecto
 COPY . .
 
-# Asegurar que existan las carpetas necesarias
+# Crear carpetas necesarias
 RUN mkdir -p uploads static
 
-# Comando de inicio
+# Comando para arrancar Flask con Gunicorn
 CMD gunicorn --bind 0.0.0.0:$PORT app_riesgo:app
