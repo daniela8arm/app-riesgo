@@ -1,0 +1,7 @@
+Flask
+gunicorn
+PyMuPDF
+matplotlib
+wordcloud
+nltk
+werkzeug
