@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Analizador de Riesgo</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: "Poppins", system-ui, -apple-system, sans-serif;
+      background: radial-gradient(circle at 0% 0%, #3de0b2 0, #00897b 40%, #004d40 100%);
+      color: #ffffff;
+      padding: 24px 12px;
+    }
+
+    .card {
+      position: relative;
+      width: 100%;
+      max-width: 520px;
+      padding: 36px 36px 30px;
+      border-radius: 30px;
+      background: linear-gradient(145deg, rgba(255,255,255,0.16), rgba(255,255,255,0.06));
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+      overflow: hidden;
+      text-align: center;
+    }
+
+    .card::before,
+    .card::after {
+      content: "";
+      position: absolute;
+      width: 280px;
+      height: 280px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.35), transparent 60%);
+      opacity: 0.7;
+      pointer-events: none;
+    }
+    .card::before { top: -140px; left: -90px; }
+    .card::after { bottom: -160px; right: -100px; opacity: 0.45; }
+
+    .mini-title {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-weight: 600;
+      color: rgba(255,255,255,0.85);
+      margin-bottom: 6px;
+    }
+
+    h1 {
+      margin: 4px 0 10px;
+      font-size: 2.2rem;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      font-size: 0.96rem;
+      font-weight: 300;
+      color: rgba(255,255,255,0.9);
+      margin-bottom: 26px;
+    }
+
+    button {
+      width: 100%;
+      padding: 16px 20px;
+      border: none;
+      border-radius: 999px;
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      cursor: pointer;
+      background: linear-gradient(90deg, #7CFFCB, #2ECC71);
+      color: #004d40;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.35);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+    }
+
+    button span.icon { font-size: 1.2rem; transform: translateY(1px); }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.45);
+      filter: brightness(1.06);
+    }
+
+    button:active {
+      transform: translateY(0);
+      box-shadow: 0 10px 24px rgba(0,0,0,0.35);
+      filter: brightness(0.98);
+    }
+
+    .helper-text {
+      margin-top: 14px;
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.8);
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <p class="mini-title">Minería de texto</p>
+    <h1>Analizador de Riesgo en Reportes</h1>
+    <p class="subtitle">
+      Sube un reporte financiero en PDF y detecta patrones de lenguaje asociados a posibles riesgos o irregularidades.
+    </p>
+
+    <form action="/analizar" method="get">
+      <button type="submit">
+        Analizar un reporte PDF
+        <span class="icon">➜</span>
+      </button>
+    </form>
+
+    <p class="helper-text">
+      Recuerda: esta es solo una herramienta de apoyo y no sustituye una auditoría profesional.
+    </p>
+  </main>
+</body>
+</html>

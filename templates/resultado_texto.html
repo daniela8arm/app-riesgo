@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Resultado del análisis</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: "Poppins", system-ui, -apple-system, sans-serif;
+      background: radial-gradient(circle at 0% 0%, #3de0b2 0, #00897b 40%, #004d40 100%);
+      color: #ffffff;
+      padding: 24px 12px;
+    }
+
+    .card {
+      position: relative;
+      width: 100%;
+      max-width: 840px;
+      padding: 30px 32px 26px;
+      border-radius: 26px;
+      background: linear-gradient(145deg, rgba(255,255,255,0.97), rgba(255,255,255,0.92));
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+      overflow: hidden;
+      color: #102a33;
+    }
+
+    .card::before,
+    .card::after {
+      content: "";
+      position: absolute;
+      width: 260px;
+      height: 260px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, rgba(0, 200, 150, 0.26), transparent 60%);
+      opacity: 0.8;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .card::before { top: -150px; right: -110px; }
+    .card::after { bottom: -170px; left: -120px; opacity: 0.4; }
+
+    h1 {
+      position: relative;
+      z-index: 1;
+      margin: 4px 0 4px;
+      font-size: 1.9rem;
+    }
+
+    .subtitle {
+      position: relative;
+      z-index: 1;
+      margin: 0 0 12px;
+      font-size: 0.9rem;
+      color: #60757a;
+    }
+
+    .filename {
+      position: relative;
+      z-index: 1;
+      font-size: 0.85rem;
+      color: #455a64;
+      margin-bottom: 10px;
+    }
+
+    .metrics {
+      position: relative;
+      z-index: 1;
+      margin: 12px 0 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 0.86rem;
+    }
+
+    .metric-pill {
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(0,150,136,0.06);
+      border: 1px solid rgba(0,150,136,0.18);
+      color: #004d40;
+    }
+
+    .nivel {
+      position: relative;
+      z-index: 1;
+      margin-top: 4px;
+      font-size: 0.96rem;
+      font-weight: 500;
+      color: #263238;
+    }
+
+    .patrones {
+      position: relative;
+      z-index: 1;
+      margin-top: 16px;
+      font-size: 0.9rem;
+      color: #37474f;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+      font-size: 0.86rem;
+    }
+
+    th, td {
+      padding: 6px 8px;
+      border-bottom: 1px solid #e0e0e0;
+      text-align: left;
+    }
+
+    th {
+      font-weight: 600;
+      color: #455a64;
+      background: #f5f7fa;
+    }
+
+    .image-wrapper {
+      position: relative;
+      z-index: 1;
+      margin-top: 20px;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+    }
+
+    .image-wrapper img {
+      width: 100%;
+      display: block;
+    }
+
+    .helper-text {
+      position: relative;
+      z-index: 1;
+      margin-top: 12px;
+      font-size: 0.78rem;
+      color: #60757a;
+    }
+
+    .actions {
+      position: relative;
+      z-index: 1;
+      margin-top: 18px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 11px 18px;
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.86rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      background: linear-gradient(90deg, #7CFFCB, #2ECC71);
+      color: #004d40;
+      box-shadow: 0 10px 26px rgba(0,0,0,0.32);
+      transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+    }
+
+    .btn span.icon { font-size: 1.05rem; transform: translateY(1px); }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 16px 36px rgba(0,0,0,0.42);
+      filter: brightness(1.05);
+    }
+
+    @media (max-width: 768px) {
+      .card { padding: 24px 18px 20px; }
+      h1 { font-size: 1.6rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Resultado del análisis</h1>
+    <p class="subtitle">
+      Resumen del riesgo lingüístico detectado en el reporte financiero analizado.
+    </p>
+    <p class="filename">Archivo analizado: <strong>{{ nombre_archivo }}</strong></p>
+
+    <div class="metrics">
+      <span class="metric-pill">
+        Términos sospechosos: <strong>{{ metrics.total_terminos }}</strong>
+      </span>
+      <span class="metric-pill">
+        Longitud del texto: <strong>{{ "{:,}".format(metrics.longitud_texto) }} caracteres</strong>
+      </span>
+      <span class="metric-pill">
+        Índice de riesgo relativo:
+        <strong>{{ "%.3f" | format(metrics.riesgo_relativo) }}%</strong>
+      </span>
+    </div>
+
+    <div class="nivel">
+      {{ metrics.descripcion_nivel }}
+    </div>
+
+    <div class="patrones">
+      <strong>Patrones detectados:</strong>
+      {% if patrones %}
+        <table>
+          <thead>
+            <tr>
+              <th>Término</th>
+              <th>Frecuencia</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for termino, conteo in patrones %}
+              <tr>
+                <td>{{ termino }}</td>
+                <td>{{ conteo }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p>No se detectaron términos sospechosos relevantes según los patrones definidos.</p>
+      {% endif %}
+    </div>
+
+    <div class="image-wrapper">
+      <img src="{{ image_path }}" alt="Nube de palabras del reporte">
+    </div>
+
+    <p class="helper-text">
+      Esta herramienta solo analiza el lenguaje del documento y sirve como apoyo. No reemplaza una auditoría financiera o legal profesional.
+    </p>
+
+    <div class="actions">
+      <a href="/analizar" class="btn">
+        <span class="icon">🔁</span>
+        Analizar otro PDF
+      </a>
+      <a href="/" class="btn">
+        <span class="icon">⬅</span>
+        Volver al inicio
+      </a>
+    </div>
+  </div>
+</body>
+</html>
