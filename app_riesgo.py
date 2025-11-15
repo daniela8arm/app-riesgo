@@ -3,36 +3,37 @@ from werkzeug.utils import secure_filename
 import os
 import fitz  # PyMuPDF
 import re
+import matplotlib
+matplotlib.use('Agg')  # Evita errores en servidores sin entorno gráfico
+import matplotlib.pyplot as plt
 import nltk
 from wordcloud import WordCloud
-import matplotlib.pyplot as plt
 from nltk.corpus import stopwords
 
-# -------------------------------------------------------------------
+# ------------------------------------------------------------
 # CONFIGURACIÓN INICIAL
-# -------------------------------------------------------------------
+# ------------------------------------------------------------
 
 app = Flask(__name__)
 
-# Carpeta para subir PDFs y guardar imágenes
-UPLOAD_FOLDER = "uploads"
-STATIC_FOLDER = "static"
+# Rutas absolutas para que Render/Docker encuentren las carpetas
+UPLOAD_FOLDER = os.path.join(os.getcwd(), "uploads")
+STATIC_FOLDER = os.path.join(os.getcwd(), "static")
+
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(STATIC_FOLDER, exist_ok=True)
 
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
-# Descargar recursos de NLTK (solo la primera vez)
-nltk.download('punkt', quiet=True)
-nltk.download('stopwords', quiet=True)
+# NOTA: NLTK se descarga en Dockerfile (NO usar nltk.download aquí)
 
 
-# -------------------------------------------------------------------
+# ------------------------------------------------------------
 # FUNCIONES DE ANÁLISIS
-# -------------------------------------------------------------------
+# ------------------------------------------------------------
 
 def extraer_texto_pdf(ruta_pdf):
-    """Extrae el texto de todas las páginas de un archivo PDF."""
+    """Extrae el texto de un archivo PDF completo."""
     doc = fitz.open(ruta_pdf)
     texto = ""
     for pagina in doc:
@@ -42,10 +43,7 @@ def extraer_texto_pdf(ruta_pdf):
 
 
 def buscar_patrones(texto):
-    """
-    Busca términos sospechosos en el texto,
-    aplicando filtros contextuales para reducir falsos positivos.
-    """
+    """Busca patrones financieros sospechosos en el texto."""
     patrones = [
         "material uncertainty",
         "going concern",
@@ -75,10 +73,8 @@ def buscar_patrones(texto):
     resultados = {}
 
     for patron in patrones:
-        # Coincidencias directas
         ocurrencias = re.findall(patron, texto, re.IGNORECASE)
 
-        # Filtro contextual: frases que atenúan el riesgo
         filtro_contextual = re.findall(
             rf"(no\s+material\s+{patron}|without\s+significant\s+{patron}|no\s+instances\s+of\s+{patron})",
             texto,
@@ -93,9 +89,10 @@ def buscar_patrones(texto):
 
 
 def generar_wordcloud(texto, output_path):
-    """Genera y guarda una nube de palabras como imagen."""
+    """Genera una nube de palabras."""
     stop_words = set(stopwords.words('english'))
-    wordcloud = WordCloud(
+
+    wc = WordCloud(
         stopwords=stop_words,
         background_color="white",
         width=800,
@@ -103,18 +100,17 @@ def generar_wordcloud(texto, output_path):
     ).generate(texto)
 
     plt.figure(figsize=(10, 5))
-    plt.imshow(wordcloud, interpolation="bilinear")
+    plt.imshow(wc, interpolation="bilinear")
     plt.axis("off")
     plt.tight_layout(pad=0)
-    plt.savefig(output_path, bbox_inches="tight", dpi=150)
+    plt.savefig(output_path, dpi=150)
     plt.close()
 
 
 def evaluar_nivel_riesgo(resultados, texto):
-    """Evalúa el nivel de riesgo financiero y devuelve métricas."""
+    """Evalúa métricas de riesgo lingüístico."""
     total = sum(resultados.values())
     longitud = len(texto) if len(texto) > 0 else 1
-
     riesgo_relativo = (total / longitud) * 100
 
     if total <= 30 or riesgo_relativo < 0.02:
@@ -124,10 +120,10 @@ def evaluar_nivel_riesgo(resultados, texto):
         nivel = "🟡 Riesgo moderado: se detectan algunos términos contables críticos, revisar contexto."
         color = "moderate"
     elif 61 <= total <= 100 or 0.05 <= riesgo_relativo < 0.1:
-        nivel = "🟠 Riesgo alto: uso elevado de terminología asociada a deterioro o posibles problemas financieros."
+        nivel = "🟠 Riesgo alto: lenguaje asociado a deterioro o problemas financieros."
         color = "high"
     else:
-        nivel = "🔴 Riesgo crítico: el reporte muestra múltiples señales de alerta financiera. Requiere auditoría detallada."
+        nivel = "🔴 Riesgo crítico: múltiples señales de alerta financiera. Requiere auditoría."
         color = "critical"
 
     return {
@@ -139,9 +135,9 @@ def evaluar_nivel_riesgo(resultados, texto):
     }
 
 
-# -------------------------------------------------------------------
+# ------------------------------------------------------------
 # RUTAS FLASK
-# -------------------------------------------------------------------
+# ------------------------------------------------------------
 
 @app.route("/")
 def inicio():
@@ -163,20 +159,13 @@ def analizar():
         ruta_pdf = os.path.join(app.config["UPLOAD_FOLDER"], filename)
         archivo.save(ruta_pdf)
 
-        # 1) Extraer texto
         texto = extraer_texto_pdf(ruta_pdf)
-
-        # 2) Buscar patrones sospechosos
         resultados = buscar_patrones(texto)
-
-        # 3) Evaluar nivel de riesgo
         metrics = evaluar_nivel_riesgo(resultados, texto)
 
-        # 4) Generar WordCloud y guardarla
         wordcloud_path = os.path.join(STATIC_FOLDER, "wordcloud_riesgo.png")
         generar_wordcloud(texto, wordcloud_path)
 
-        # Ordenar patrones por frecuencia (de mayor a menor)
         patrones_ordenados = sorted(resultados.items(), key=lambda x: x[1], reverse=True)
 
         return render_template(
@@ -184,10 +173,9 @@ def analizar():
             nombre_archivo=filename,
             patrones=patrones_ordenados,
             metrics=metrics,
-            image_path="static/wordcloud_riesgo.png"
+            image_path="/static/wordcloud_riesgo.png"
         )
 
-    # Si es GET → solo mostrar el formulario
     return render_template("analisis_texto.html")
 
 
